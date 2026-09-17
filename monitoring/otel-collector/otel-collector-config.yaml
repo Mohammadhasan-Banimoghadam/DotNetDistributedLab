@@ -1,0 +1,64 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+      http:
+        endpoint: 0.0.0.0:4318
+
+
+processors:
+  batch:
+
+
+exporters:
+
+  debug:
+    verbosity: detailed
+
+  elasticsearch/otel:
+    endpoints:
+      - http://elasticsearch:9200
+    mapping:
+      mode: otel
+
+
+service:
+
+  pipelines:
+
+    traces:
+      receivers:
+        - otlp
+
+      processors:
+        - batch
+
+      exporters:
+        - debug
+        - elasticsearch/otel
+
+
+    metrics:
+      receivers:
+        - otlp
+
+      processors:
+        - batch
+
+      exporters:
+        - debug
+        - elasticsearch/otel
+
+
+    logs:
+      receivers:
+        - otlp
+
+      processors:
+        - batch
+
+      exporters:
+        - debug
+        - elasticsearch/otel

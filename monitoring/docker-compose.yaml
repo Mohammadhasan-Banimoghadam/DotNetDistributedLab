@@ -1,0 +1,121 @@
+# services:
+
+#   elastic-agent:
+#     image: docker.elastic.co/elastic-agent/elastic-agent:9.5.3
+#     container_name: elastic-agent
+
+#     command:
+#       - "otel"
+#       - "--config"
+#       - "/etc/elastic-agent/otel.yml"
+
+#     volumes:
+#       - ./otel-collector/elastic-agent-otel.yml:/etc/elastic-agent/otel.yml:ro
+
+#     ports:
+#       - "4317:4317"
+#       - "4318:4318"
+
+#     depends_on:
+#       - elasticsearch
+
+#     restart: unless-stopped
+
+
+#   elasticsearch:
+#     image: elasticsearch:9.5.3
+#     container_name: elasticsearch
+
+#     environment:
+#       - discovery.type=single-node
+#       - xpack.security.enabled=false
+#       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+#     ports:
+#       - "9200:9200"
+
+#     volumes:
+#       - elasticsearch-data:/usr/share/elasticsearch/data
+
+#     restart: unless-stopped
+
+
+#   kibana:
+#     image: kibana:9.5.3
+#     container_name: kibana
+
+#     environment:
+#       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
+#     ports:
+#       - "5601:5601"
+
+#     depends_on:
+#       - elasticsearch
+
+#     restart: unless-stopped
+
+
+# volumes:
+#   elasticsearch-data:    
+
+
+services:
+
+  elasticsearch:
+    image: elasticsearch:9.5.3
+    container_name: elasticsearch
+
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+    ports:
+      - "9200:9200"
+
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+    restart: unless-stopped
+
+
+  kibana:
+    image: kibana:9.5.3
+    container_name: kibana
+
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=0123456789abcdef0123456789abcdef
+
+    ports:
+      - "5601:5601"
+
+    depends_on:
+      - elasticsearch
+
+    restart: unless-stopped
+
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+
+    command:
+      - "--config=/etc/otelcol-contrib/otel-collector-config.yaml"
+
+    volumes:
+      - ./otel-collector/otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
+
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+
+    depends_on:
+      - elasticsearch
+
+    restart: unless-stopped
+
+
+volumes:
+  elasticsearch-data:
