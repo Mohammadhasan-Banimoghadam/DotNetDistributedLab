@@ -16,6 +16,18 @@ using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var otlpEndpoint =
+    builder.Configuration["OpenTelemetry:OtlpEndpoint"]
+    ?? throw new InvalidOperationException("OpenTelemetry endpoint is not configured.");
+
+var customerServiceUrl =
+    builder.Configuration["Services:CustomerService"]
+    ?? throw new InvalidOperationException("CustomerService URL is not configured.");
+
+var paymentServiceUrl =
+    builder.Configuration["Services:PaymentService"]
+    ?? throw new InvalidOperationException("PaymentService URL is not configured.");
+
 //builder.Host.UseSerilog();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -27,7 +39,7 @@ builder.Logging.AddOpenTelemetry(logging =>
 
     logging.AddOtlpExporter(options =>
     {
-        options.Endpoint = new Uri("http://localhost:4317");
+        options.Endpoint = new Uri(otlpEndpoint);
     });
 });
 
@@ -43,7 +55,7 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .AddOtlpExporter(options =>
             {
-                options.Endpoint = new Uri("http://localhost:4317");
+                options.Endpoint = new Uri(otlpEndpoint);
             });
     })
 
@@ -55,14 +67,14 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .AddOtlpExporter(options =>
             {
-                options.Endpoint = new Uri("http://localhost:4317");
+                options.Endpoint = new Uri(otlpEndpoint);
             });
     });
 
 builder.Services
     .AddHttpClient<CustomerClient>(client =>
     {
-        client.BaseAddress = new Uri("http://localhost:5096/");
+        client.BaseAddress = new Uri(customerServiceUrl);
     })
     .AddStandardResilienceHandler(options =>
         {
@@ -83,7 +95,7 @@ builder.Services
 builder.Services
     .AddHttpClient<PaymentClient>(client =>
     {
-        client.BaseAddress = new Uri("http://localhost:5015/");
+        client.BaseAddress = new Uri(paymentServiceUrl);
     })
     .AddStandardResilienceHandler(options =>
     {

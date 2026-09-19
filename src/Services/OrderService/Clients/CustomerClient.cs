@@ -22,19 +22,7 @@ public class CustomerClient
         int customerId,
         CancellationToken cancellationToken = default)
     {
-        //var response = await _httpClient.GetAsync(
-        //    $"api/Customers/{customerId}",
-        //    cancellationToken);
 
-        //if (response.StatusCode == HttpStatusCode.NotFound)
-        //{
-        //    return null;
-        //}
-
-        //response.EnsureSuccessStatusCode();
-
-        //return await response.Content
-        //    .ReadFromJsonAsync<CustomerResponse>(cancellationToken);
 
         _logger.LogInformation(
             "Requesting CustomerService for CustomerId: {CustomerId}",
