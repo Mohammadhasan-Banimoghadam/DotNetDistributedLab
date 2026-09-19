@@ -30,10 +30,10 @@ jobs:
         run: dotnet test --no-build --configuration Release
 
       - name: Build CustomerService Docker Image
-        run: docker build -t customerservice:latest ./src/Services/CustomerService
+        run: docker build -t customerservice:latest -f ./src/Services/CustomerService/Dockerfile .
 
       - name: Build OrderService Docker Image
-        run: docker build -t orderservice:latest ./src/Services/OrderService
+        run: docker build -t orderservice:latest -f ./src/Services/OrderService/Dockerfile .
 
       - name: Build PaymentService Docker Image
-        run: docker build -t paymentservice:latest ./src/Services/PaymentService
+        run: docker build -t paymentservice:latest -f ./src/Services/PaymentService/Dockerfile .
