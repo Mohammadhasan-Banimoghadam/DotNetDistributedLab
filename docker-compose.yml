@@ -1,6 +1,9 @@
 services:
 
   order-service:
+    build:
+      context: .
+      dockerfile: src/Services/OrderService/Dockerfile
     image: orderservice:local
     container_name: order-service
 
@@ -8,15 +11,18 @@ services:
       - "5260:8080"
 
     environment:
-     ASPNETCORE_ENVIRONMENT: "Development"
-     OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
-     Services__CustomerService: "http://customer-service:8080"
-     Services__PaymentService: "http://payment-service:8080"
-      
+      ASPNETCORE_ENVIRONMENT: "Development"
+      OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
+      Services__CustomerService: "http://customer-service:8080"
+      Services__PaymentService: "http://payment-service:8080"
+
     networks:
       - monitoring-network
 
   payment-service:
+    build:
+      context: .
+      dockerfile: src/Services/PaymentService/Dockerfile
     image: paymentservice:local
     container_name: payment-service
     ports:
@@ -25,6 +31,9 @@ services:
       - monitoring-network
 
   customer-service:
+    build:
+      context: .
+      dockerfile: src/Services/CustomerService/Dockerfile
     image: customerservice:local
     container_name: customer-service
     ports:
@@ -36,6 +45,3 @@ services:
 networks:
   monitoring-network:
     external: true
-
-
-      
