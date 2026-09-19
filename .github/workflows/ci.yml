@@ -30,10 +30,25 @@ jobs:
         run: dotnet test --no-build --configuration Release
 
       - name: Build CustomerService Docker Image
-        run: docker build -t customerservice:latest -f ./src/Services/CustomerService/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/customerservice:latest -f ./src/Services/CustomerService/Dockerfile .
 
       - name: Build OrderService Docker Image
-        run: docker build -t orderservice:latest -f ./src/Services/OrderService/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest -f ./src/Services/OrderService/Dockerfile .
 
       - name: Build PaymentService Docker Image
-        run: docker build -t paymentservice:latest -f ./src/Services/PaymentService/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/paymentservice:latest -f ./src/Services/PaymentService/Dockerfile .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push CustomerService Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/customerservice:latest
+
+      - name: Push OrderService Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
+
+      - name: Push PaymentService Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/paymentservice:latest
