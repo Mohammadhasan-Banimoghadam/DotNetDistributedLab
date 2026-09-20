@@ -1,7 +1,7 @@
 services:
 
   order-service:
-    image: dotnetdistributedlab/orderservice:latest
+    image: dotnetdistributedlab/orderservice:${IMAGE_TAG}
     container_name: order-service
 
     ports:
@@ -20,7 +20,7 @@ services:
 
 
   payment-service:
-    image: dotnetdistributedlab/paymentservice:latest
+    image: dotnetdistributedlab/paymentservice:${IMAGE_TAG}
     container_name: payment-service
 
     ports:
@@ -33,7 +33,7 @@ services:
 
 
   customer-service:
-    image: dotnetdistributedlab/customerservice:latest
+    image: dotnetdistributedlab/customerservice:${IMAGE_TAG}
     container_name: customer-service
 
     ports:

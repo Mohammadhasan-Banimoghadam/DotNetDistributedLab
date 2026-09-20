@@ -59,15 +59,20 @@ jobs:
 
 
   deploy:
-
+  
     needs: build
-
+  
     runs-on: self-hosted
-
+  
     steps:
       - name: Deploy
         shell: powershell
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           cd C:\Users\Lion\Desktop\Kibana\DistributedMonitoring
+  
+          $env:IMAGE_TAG = $env:IMAGE_TAG.Substring(0,7)
+  
           docker compose -f docker-compose.prod.yml pull
           docker compose -f docker-compose.prod.yml up -d
