@@ -52,3 +52,18 @@ jobs:
 
       - name: Push PaymentService Image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/paymentservice:latest
+
+
+  deploy:
+
+    needs: build
+
+    runs-on: self-hosted
+
+    steps:
+      - name: Deploy
+        shell: powershell
+        run: |
+          cd C:\Users\Lion\Desktop\Kibana\DistributedMonitoring
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
