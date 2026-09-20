@@ -29,14 +29,18 @@ jobs:
       - name: Test
         run: dotnet test --no-build --configuration Release
 
+      - name: Set Image Tag
+        shell: bash
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
       - name: Build CustomerService Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/customerservice:latest -f ./src/Services/CustomerService/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/customerservice:${{ env.IMAGE_TAG }} -f ./src/Services/CustomerService/Dockerfile .
 
       - name: Build OrderService Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest -f ./src/Services/OrderService/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:${{ env.IMAGE_TAG }} -f ./src/Services/OrderService/Dockerfile .
 
       - name: Build PaymentService Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/paymentservice:latest -f ./src/Services/PaymentService/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/paymentservice:${{ env.IMAGE_TAG }} -f ./src/Services/PaymentService/Dockerfile .
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -45,13 +49,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push CustomerService Image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/customerservice:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/customerservice:${{ env.IMAGE_TAG }}
 
       - name: Push OrderService Image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:${{ env.IMAGE_TAG }}
 
       - name: Push PaymentService Image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/paymentservice:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/paymentservice:${{ env.IMAGE_TAG }}
 
 
   deploy:
