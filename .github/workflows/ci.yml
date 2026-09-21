@@ -65,6 +65,25 @@ jobs:
     runs-on: self-hosted
   
     steps:
+
+      - name: Capture Previous Version
+        shell: powershell
+        run: |
+          cd C:\Users\Lion\Desktop\Kibana\DistributedMonitoring
+
+          $previousImage = docker inspect order-service --format '{{.Config.Image}}'
+
+          if (-not $previousImage) {
+            throw "Could not determine currently deployed image."
+          }
+
+          $previousTag = ($previousImage -split ':')[-1]
+
+          Write-Host "Previous deployed tag: $previousTag"
+
+          "PREVIOUS_TAG=$previousTag" >> $env:GITHUB_ENV
+
+
       - name: Deploy
         shell: powershell
         env:
@@ -74,5 +93,61 @@ jobs:
   
           $env:IMAGE_TAG = $env:IMAGE_TAG.Substring(0,7)
   
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
+
+
+      - name: Health Check
+        shell: powershell
+        run: |
+          $urls = @(
+            "http://localhost:5260/health",
+            "http://localhost:5096/health",
+            "http://localhost:5015/health"
+          )
+
+          foreach ($url in $urls) {
+            Write-Host "Checking $url"
+
+            $healthy = $false
+
+            for ($attempt = 1; $attempt -le 10; $attempt++) {
+
+              try {
+                $response = Invoke-WebRequest `
+                  -Uri $url `
+                  -UseBasicParsing `
+                  -TimeoutSec 5
+
+                if ($response.StatusCode -eq 200) {
+                  $healthy = $true
+                  Write-Host "$url is healthy."
+                  break
+                }
+              }
+              catch {
+                Write-Host "Attempt $attempt failed for $url"
+              }
+
+              Write-Host "Waiting 3 seconds before next attempt..."
+              Start-Sleep -Seconds 3
+            }
+
+            if (-not $healthy) {
+              throw "Health check failed for $url after 10 attempts."
+            }
+          }
+
+
+      - name: Rollback
+        if: failure()
+        shell: powershell
+        run: |
+          cd C:\Users\Lion\Desktop\Kibana\DistributedMonitoring
+
+          $env:IMAGE_TAG = $env:PREVIOUS_TAG
+
+          Write-Host "Rolling back to version: $env:IMAGE_TAG"
+
           docker compose -f docker-compose.prod.yml pull
           docker compose -f docker-compose.prod.yml up -d

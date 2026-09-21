@@ -16,6 +16,8 @@ using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHealthChecks();
+
 var otlpEndpoint =
     builder.Configuration["OpenTelemetry:OtlpEndpoint"]
     ?? throw new InvalidOperationException("OpenTelemetry endpoint is not configured.");
@@ -115,7 +117,6 @@ builder.Services
 
 builder.Services.AddScoped<OrderApplicationService>();
 builder.Services.AddControllers();
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -127,6 +128,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
+app.MapHealthChecks("/health");
 app.Run();
 
 
