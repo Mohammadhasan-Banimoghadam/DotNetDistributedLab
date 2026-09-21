@@ -128,7 +128,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health-broken");
 app.Run();
 
 
