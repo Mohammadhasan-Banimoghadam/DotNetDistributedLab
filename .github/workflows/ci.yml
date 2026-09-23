@@ -68,8 +68,10 @@ jobs:
 
       - name: Capture Previous Version
         shell: powershell
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
         run: |
-          cd C:\Users\Lion\Desktop\Kibana\DistributedMonitoring
+          cd $env:DEPLOY_PATH
 
           $previousImage = docker inspect order-service --format '{{.Config.Image}}'
 
@@ -88,8 +90,9 @@ jobs:
         shell: powershell
         env:
           IMAGE_TAG: ${{ github.sha }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
         run: |
-          cd C:\Users\Lion\Desktop\Kibana\DistributedMonitoring
+          cd $env:DEPLOY_PATH
   
           $env:IMAGE_TAG = $env:IMAGE_TAG.Substring(0,7)
   
@@ -142,8 +145,10 @@ jobs:
       - name: Rollback
         if: failure()
         shell: powershell
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
         run: |
-          cd C:\Users\Lion\Desktop\Kibana\DistributedMonitoring
+          cd $env:DEPLOY_PATH
 
           $env:IMAGE_TAG = $env:PREVIOUS_TAG
 
