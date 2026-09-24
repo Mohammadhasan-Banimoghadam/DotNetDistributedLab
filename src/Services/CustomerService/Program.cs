@@ -1,12 +1,19 @@
+using CustomerService.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<CustomerDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("CustomerDb")));
+
 builder.Services.AddHealthChecks();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource

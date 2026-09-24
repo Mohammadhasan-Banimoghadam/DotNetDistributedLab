@@ -5,6 +5,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Logs;
+using Microsoft.EntityFrameworkCore;
+using OrderService.Infrastructure.Persistence;
 //using Serilog;
 //using Serilog.Enrichers.Span;
 
@@ -17,6 +19,10 @@ using OpenTelemetry.Logs;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHealthChecks();
+
+builder.Services.AddDbContext<OrderDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("OrderDb")));
 
 var otlpEndpoint =
     builder.Configuration["OpenTelemetry:OtlpEndpoint"]

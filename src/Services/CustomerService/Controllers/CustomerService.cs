@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CustomerService.Domain.Entities;
+using CustomerService.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CustomerService.Controllers;
 
@@ -6,49 +9,38 @@ namespace CustomerService.Controllers;
 [Route("api/[controller]")]
 public class CustomersController : ControllerBase
 {
-    [HttpGet("{id:int}")]
-    public IActionResult Get(int id)
+    private readonly CustomerDbContext _db;
+
+    public CustomersController(CustomerDbContext db)
     {
-        if (id != 1)
+        _db = db;
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var customer = await _db.Customers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (customer is null)
         {
             return NotFound();
         }
 
-        return Ok(new
-        {
-            Id = 1,
-            Name = "Mohammad",
-            Email = "mohammad@test.com"
-        });
+        return Ok(customer);
     }
 
-    //private static int _requestCount;
+    [HttpPost]
+    public async Task<IActionResult> Create(Customer customer)
+    {
+        _db.Customers.Add(customer);
 
-    //[HttpGet("{id:int}")]
-    //public IActionResult Get(int id)
-    //{
-    //    if (id != 1)
-    //    {
-    //        return NotFound();
-    //    }
+        await _db.SaveChangesAsync();
 
-    //    _requestCount++;
-
-    //    Console.WriteLine(
-    //        $"CustomerService - Attempt: {_requestCount}");
-
-    //    if (_requestCount % 3 != 0)
-    //    {
-    //        return StatusCode(
-    //            StatusCodes.Status500InternalServerError,
-    //            "Temporary failure");
-    //    }
-
-    //    return Ok(new
-    //    {
-    //        Id = 1,
-    //        Name = "Mohammad",
-    //        Email = "mohammad@test.com"
-    //    });
-    //}
+        return CreatedAtAction(
+            nameof(Get),
+            new { id = customer.Id },
+            customer);
+    }
 }

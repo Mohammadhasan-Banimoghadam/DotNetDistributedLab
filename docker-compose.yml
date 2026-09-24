@@ -1,21 +1,32 @@
 services:
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrongPassword123!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - monitoring-network
+
   order-service:
     build:
       context: .
       dockerfile: src/Services/OrderService/Dockerfile
     image: orderservice:local
     container_name: order-service
-
     ports:
       - "5260:8080"
-
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__OrderDb: "Server=sqlserver,1433;Database=OrderDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
       OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
       Services__CustomerService: "http://customer-service:8080"
       Services__PaymentService: "http://payment-service:8080"
-
     networks:
       - monitoring-network
 
@@ -27,6 +38,9 @@ services:
     container_name: payment-service
     ports:
       - "5015:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__PaymentDb: "Server=sqlserver,1433;Database=PaymentDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
     networks:
       - monitoring-network
 
@@ -38,9 +52,14 @@ services:
     container_name: customer-service
     ports:
       - "5096:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__CustomerDb: "Server=sqlserver,1433;Database=CustomerDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
     networks:
       - monitoring-network
 
+volumes:
+  sqlserver-data:
 
 networks:
   monitoring-network:
