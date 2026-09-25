@@ -58,6 +58,21 @@ services:
     networks:
       - monitoring-network
 
+  product-service:
+    build:
+      context: .
+      dockerfile: src/Services/ProductService/Dockerfile
+    image: productservice:local
+    container_name: product-service
+    ports:
+      - "5205:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__ProductDb: "Server=sqlserver,1433;Database=ProductDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
+      OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
+    networks:
+      - monitoring-network
+
 volumes:
   sqlserver-data:
 
