@@ -36,6 +36,10 @@ var paymentServiceUrl =
     builder.Configuration["Services:PaymentService"]
     ?? throw new InvalidOperationException("PaymentService URL is not configured.");
 
+var productServiceUrl =
+    builder.Configuration["Services:ProductService"]
+    ?? throw new InvalidOperationException("ProductService URL is not configured.");
+
 //builder.Host.UseSerilog();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -104,6 +108,26 @@ builder.Services
     .AddHttpClient<PaymentClient>(client =>
     {
         client.BaseAddress = new Uri(paymentServiceUrl);
+    })
+    .AddStandardResilienceHandler(options =>
+    {
+        options.Retry.MaxRetryAttempts = 3;
+
+        options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
+
+        options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(10);
+
+        options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
+
+        options.CircuitBreaker.FailureRatio = 0.5;
+
+        options.CircuitBreaker.MinimumThroughput = 2;
+    });
+
+builder.Services
+    .AddHttpClient<ProductClient>(client =>
+    {
+        client.BaseAddress = new Uri(productServiceUrl);
     })
     .AddStandardResilienceHandler(options =>
     {

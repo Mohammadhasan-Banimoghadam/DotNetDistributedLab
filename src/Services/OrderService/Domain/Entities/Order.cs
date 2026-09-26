@@ -12,38 +12,64 @@ public class Order
 
     public DateTime CreatedAtUtc { get; private set; }
 
+    public ICollection<OrderItem> Items { get; private set; } = new List<OrderItem>();
+
     private Order()
     {
     }
 
-    public Order(
-        int customerId,
-        decimal totalAmount)
+    public Order(int customerId)
     {
-        if (customerId == 0)
+        if (customerId <= 0)
             throw new ArgumentException(
-                "CustomerId cannot be empty.",
+                "CustomerId must be greater than zero.",
                 nameof(customerId));
-
-        if (totalAmount <= 0)
-            throw new ArgumentException(
-                "Total amount must be greater than zero.",
-                nameof(totalAmount));
 
         Id = Guid.NewGuid();
         CustomerId = customerId;
-        TotalAmount = totalAmount;
+        TotalAmount = 0;
         Status = OrderStatus.Pending;
         CreatedAtUtc = DateTime.UtcNow;
     }
 
+    public void AddItem(OrderItem item)
+    {
+        if (item is null)
+            throw new ArgumentNullException(nameof(item));
+
+        if (Status != OrderStatus.Pending)
+            throw new InvalidOperationException(
+                "Items cannot be added to a non-pending order.");
+
+        Items.Add(item);
+
+        RecalculateTotal();
+    }
+
+    private void RecalculateTotal()
+    {
+        TotalAmount = Items.Sum(x => x.GetTotalPrice());
+    }
+
     public void MarkAsPaid()
     {
+        if (Status != OrderStatus.Pending)
+            throw new InvalidOperationException(
+                "Only pending orders can be marked as paid.");
+
+        if (TotalAmount <= 0)
+            throw new InvalidOperationException(
+                "Order total amount must be greater than zero.");
+
         Status = OrderStatus.Paid;
     }
 
     public void Cancel()
     {
+        if (Status != OrderStatus.Pending)
+            throw new InvalidOperationException(
+                "Only pending orders can be cancelled.");
+
         Status = OrderStatus.Cancelled;
     }
 }

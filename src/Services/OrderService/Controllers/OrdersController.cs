@@ -36,6 +36,39 @@ public class OrdersController : ControllerBase
             $"/api/orders/{result.Id}",
             result);
     }
+
+    [HttpPost("{id}/cancel")]
+    public async Task<ActionResult<OrderResponse>> Cancel(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        _logger.LogInformation(
+            "Cancelling order {OrderId}",
+            id);
+
+        try
+        {
+            var result = await _orderService.CancelOrderAsync(
+                id,
+                cancellationToken);
+
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new
+            {
+                message = ex.Message
+            });
+        }
+    }
 }
 
 

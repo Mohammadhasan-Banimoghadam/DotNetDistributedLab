@@ -9,7 +9,10 @@ public class OrderDbContext : DbContext
         : base(options)
     {
     }
+
     public DbSet<Order> Orders => Set<Order>();
+
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +31,26 @@ public class OrderDbContext : DbContext
                 .IsRequired();
 
             entity.Property(x => x.CreatedAtUtc)
+                .IsRequired();
+
+            entity.HasMany(x => x.Items)
+                .WithOne()
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.ProductId)
+                .IsRequired();
+
+            entity.Property(x => x.Quantity)
+                .IsRequired();
+
+            entity.Property(x => x.UnitPrice)
+                .HasPrecision(18, 2)
                 .IsRequired();
         });
     }

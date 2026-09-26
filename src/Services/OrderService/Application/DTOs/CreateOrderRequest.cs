@@ -2,4 +2,8 @@
 
 public record CreateOrderRequest(
     int CustomerId,
-    decimal TotalAmount);
+    List<CreateOrderItemRequest> Items);
+
+public record CreateOrderItemRequest(
+    int ProductId,
+    int Quantity);
